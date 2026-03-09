@@ -1,0 +1,4 @@
+Goal: build a simple interactive web site for a group idea board.
+purpose: The members can set their names and ideas and post them on the board.
+layout: There should 2 text fields (one for user name & one for the idea). A button (to post the idea). A Text box (to display all the ideas)
+note: Create HTML, CSS, Javascript files. Write dummy ideas to the text box. Save this prompt in a text file.
