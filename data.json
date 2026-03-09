@@ -1,0 +1,17 @@
+{
+  "students": ["Alice", "Bob", "Charlie", "David", "Eva"],
+  "ideas": [
+    {
+      "name": "Alice",
+      "idea": "Organize a monthly coding hackathon to work on side projects."
+    },
+    {
+      "name": "Bob",
+      "idea": "Introduce a peer-to-peer mentoring system for new students."
+    },
+    {
+      "name": "Charlie",
+      "idea": "Create a shared digital library for recommended learning resources."
+    }
+  ]
+}
