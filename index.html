@@ -3,32 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Group Idea Board</title>
+    <title>IdeaFlow | Group Idea Board</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>Group Idea Board</h1>
-        <div class="input-section">
-            <div class="name-selection">
-                <select id="nameDropdown" required>
-                    <option value="" disabled selected>Select Your Name</option>
-                </select>
-                <div class="add-new-student">
-                    <input type="text" id="newStudentName" placeholder="New student name">
-                    <button id="addStudentButton">Add Student</button>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="currentColor"/>
+                </svg>
+                <span>IdeaFlow</span>
+            </div>
+            <div class="stats" id="statsContainer">
+                Total Ideas: <span id="totalIdeas">0</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="input-card">
+            <div class="section-header">
+                <h2>Share a New Idea</h2>
+                <button id="resetFormButton" class="btn-text">Reset Form</button>
+            </div>
+            
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="nameDropdown">Author</label>
+                    <select id="nameDropdown" required>
+                        <option value="" disabled selected>Select Your Name</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="newStudentName">Add New Author</label>
+                    <div class="add-new-student">
+                        <input type="text" id="newStudentName" placeholder="Enter name...">
+                        <button id="addStudentButton" class="btn-secondary">Add</button>
+                    </div>
                 </div>
             </div>
-            <input type="text" id="userIdea" placeholder="Share your idea..." required>
-            <button id="postButton">Post Idea</button>
-        </div>
-        <div class="board-section">
-            <h2>Board</h2>
-            <div id="ideasDisplay" class="ideas-container">
+
+            <div class="input-group">
+                <label for="userIdea">Your Idea</label>
+                <textarea id="userIdea" placeholder="What's on your mind? Describe your idea clearly..." rows="3" required></textarea>
+            </div>
+            
+            <button id="postButton" class="btn-primary">Post to Board</button>
+        </section>
+
+        <section class="board-section">
+            <div class="board-header">
+                <h2>Idea Board</h2>
+                <div class="filter-group">
+                    <label for="filterDropdown">Filter by:</label>
+                    <select id="filterDropdown">
+                        <option value="all">All Authors</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="ideasDisplay" class="ideas-grid">
                 <!-- Ideas will be displayed here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 IdeaFlow Collaborative Platform. Built for innovation.</p>
+    </footer>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay">
+        <!-- Edit Modal -->
+        <div id="editModal" class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Your Idea</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="editIdeaText" rows="4"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelEdit" class="btn-secondary">Cancel</button>
+                <button id="saveEdit" class="btn-primary">Save Changes</button>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div id="deleteModal" class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Idea</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove this idea? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelDelete" class="btn-secondary">Cancel</button>
+                <button id="confirmDelete" class="btn-danger">Delete Idea</button>
             </div>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
