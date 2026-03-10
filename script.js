@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Elements
+    // ==================== IDEA BOARD VARIABLES ====================
     const nameDropdown = document.getElementById('nameDropdown');
     const filterDropdown = document.getElementById('filterDropdown');
     const newStudentInput = document.getElementById('newStudentName');
@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const postButton = document.getElementById('postButton');
     const resetFormButton = document.getElementById('resetFormButton');
     const ideasDisplay = document.getElementById('ideasDisplay');
-    const totalIdeasSpan = document.getElementById('totalIdeas');
     const themeToggle = document.getElementById('themeToggle');
     const sunIcon = themeToggle.querySelector('.sun-icon');
     const moonIcon = themeToggle.querySelector('.moon-icon');
@@ -32,12 +31,44 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Charlie', idea: 'Create a shared digital library for recommended learning resources.', votes: 0 }
     ];
 
-    // Ensure all existing ideas have a votes property
     ideas = ideas.map(idea => ({ ...idea, votes: idea.votes || 0 }));
 
-    let isDarkMode = localStorage.getItem('idea_board_theme') !== 'light';
+    // ==================== GPA CALCULATOR VARIABLES ====================
+    const coursesTableBody = document.getElementById('coursesTableBody');
+    const courseNameInput = document.getElementById('courseName');
+    const courseGradeSelect = document.getElementById('courseGrade');
+    const courseCreditsInput = document.getElementById('courseCredits');
+    const addCourseButton = document.getElementById('addCourseButton');
+    const gpaResult = document.getElementById('gpaResult');
+    const totalCreditsDisplay = document.getElementById('totalCredits');
+    const totalQualityPointsDisplay = document.getElementById('totalQualityPoints');
+    const resetGPAButton = document.getElementById('resetGPAButton');
 
-    // Functions
+    let courses = JSON.parse(localStorage.getItem('student_toolkit_courses')) || [];
+
+    // ==================== POMODORO TIMER VARIABLES ====================
+    const timerDisplay = document.getElementById('timerDisplay');
+    const startTimerButton = document.getElementById('startTimerButton');
+    const pauseTimerButton = document.getElementById('pauseTimerButton');
+    const resetTimerButton = document.getElementById('resetTimerSmallButton');
+    const resetTimerMainButton = document.getElementById('resetTimerButton');
+    const workDurationInput = document.getElementById('workDuration');
+    const breakDurationInput = document.getElementById('breakDuration');
+    const sessionsCountDisplay = document.getElementById('sessionsCount');
+    const progressCircle = document.getElementById('progressCircle');
+
+    let timerState = {
+        isRunning: false,
+        isWorkSession: true,
+        timeRemaining: 25 * 60,
+        totalTime: 25 * 60,
+        sessionsCompleted: parseInt(localStorage.getItem('student_toolkit_sessions')) || 0,
+        intervalId: null
+    };
+
+    // ==================== THEME MANAGEMENT ====================
+    let isDarkMode = localStorage.getItem('student_toolkit_theme') !== 'light';
+
     function applyTheme() {
         if (isDarkMode) {
             document.body.classList.add('dark-mode');
@@ -48,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sunIcon.style.display = 'block';
             moonIcon.style.display = 'none';
         }
-        localStorage.setItem('idea_board_theme', isDarkMode ? 'dark' : 'light');
+        localStorage.setItem('student_toolkit_theme', isDarkMode ? 'dark' : 'light');
     }
 
     function toggleTheme() {
@@ -56,14 +87,39 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme();
     }
 
-    function saveData() {
-        localStorage.setItem('group_idea_board_students', JSON.stringify(students));
-        localStorage.setItem('group_idea_board_ideas', JSON.stringify(ideas));
-        updateStats();
+    // ==================== NAVIGATION ====================
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const toolName = tab.getAttribute('data-tool');
+            switchTool(toolName);
+        });
+    });
+
+    function switchTool(toolName) {
+        // Hide all tool sections
+        document.querySelectorAll('.tool-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show selected tool
+        const toolSection = document.getElementById(`${toolName}-tool`);
+        if (toolSection) {
+            toolSection.classList.add('active');
+        }
+        
+        // Mark tab as active
+        document.querySelector(`[data-tool="${toolName}"]`).classList.add('active');
     }
 
-    function updateStats() {
-        totalIdeasSpan.textContent = ideas.length;
+    // ==================== IDEA BOARD FUNCTIONS ====================
+    function saveIdeaBoardData() {
+        localStorage.setItem('group_idea_board_students', JSON.stringify(students));
+        localStorage.setItem('group_idea_board_ideas', JSON.stringify(ideas));
     }
 
     function populateDropdowns() {
@@ -84,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleVote(index) {
         ideas[index].votes++;
-        saveData();
+        saveIdeaBoardData();
         renderIdeas(filterDropdown.value);
     }
 
@@ -99,12 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Find the maximum vote count to identify "Hot" ideas
         const maxVotes = ideas.length > 0 ? Math.max(...ideas.map(i => i.votes)) : 0;
 
-        // We show newest first
         [...filteredIdeas].reverse().forEach((item) => {
-            // Find original index in the main ideas array
             const originalIndex = ideas.findIndex(i => i === item);
             const isHot = item.votes > 0 && item.votes === maxVotes;
             
@@ -166,12 +219,163 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal(deleteModal);
     }
 
-    // Event Listeners
+    // ==================== GPA CALCULATOR FUNCTIONS ====================
+    function saveGPAData() {
+        localStorage.setItem('student_toolkit_courses', JSON.stringify(courses));
+        calculateGPA();
+    }
+
+    function addCourse() {
+        const name = courseNameInput.value.trim();
+        const grade = parseFloat(courseGradeSelect.value);
+        const credits = parseFloat(courseCreditsInput.value);
+
+        if (!name || !courseGradeSelect.value || !credits) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        courses.push({ name, grade, credits });
+        saveGPAData();
+        renderCoursesTable();
+        courseNameInput.value = '';
+        courseGradeSelect.value = '';
+        courseCreditsInput.value = '';
+    }
+
+    function deleteCourse(index) {
+        courses.splice(index, 1);
+        saveGPAData();
+        renderCoursesTable();
+    }
+
+    function calculateGPA() {
+        if (courses.length === 0) {
+            gpaResult.textContent = '0.00';
+            totalCreditsDisplay.textContent = '0';
+            totalQualityPointsDisplay.textContent = '0';
+            return;
+        }
+
+        let totalQualityPoints = 0;
+        let totalCredits = 0;
+
+        courses.forEach(course => {
+            const qualityPoints = course.grade * course.credits;
+            totalQualityPoints += qualityPoints;
+            totalCredits += course.credits;
+        });
+
+        const gpa = totalQualityPoints / totalCredits;
+        gpaResult.textContent = gpa.toFixed(2);
+        totalCreditsDisplay.textContent = totalCredits.toFixed(1);
+        totalQualityPointsDisplay.textContent = totalQualityPoints.toFixed(2);
+    }
+
+    function renderCoursesTable() {
+        coursesTableBody.innerHTML = '';
+        courses.forEach((course, index) => {
+            const qualityPoints = course.grade * course.credits;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${course.name}</td>
+                <td>${course.grade.toFixed(1)}</td>
+                <td>${course.credits.toFixed(1)}</td>
+                <td>${qualityPoints.toFixed(2)}</td>
+                <td><button class="btn-delete-course">Remove</button></td>
+            `;
+            row.querySelector('.btn-delete-course').addEventListener('click', () => deleteCourse(index));
+            coursesTableBody.appendChild(row);
+        });
+        calculateGPA();
+    }
+
+    // ==================== POMODORO TIMER FUNCTIONS ====================
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay() {
+        timerDisplay.textContent = formatTime(timerState.timeRemaining);
+        updateProgressCircle();
+    }
+
+    function updateProgressCircle() {
+        const progress = (timerState.timeRemaining / timerState.totalTime);
+        const circumference = 2 * Math.PI * 140;
+        const offset = circumference * progress;
+        progressCircle.style.strokeDashoffset = offset;
+    }
+
+    function startTimer() {
+        if (timerState.isRunning) return;
+
+        timerState.isRunning = true;
+        startTimerButton.style.display = 'none';
+        pauseTimerButton.style.display = 'flex';
+
+        timerState.intervalId = setInterval(() => {
+            if (timerState.timeRemaining > 0) {
+                timerState.timeRemaining--;
+                updateTimerDisplay();
+            } else {
+                completeSession();
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        timerState.isRunning = false;
+        clearInterval(timerState.intervalId);
+        startTimerButton.style.display = 'flex';
+        pauseTimerButton.style.display = 'none';
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        timerState.isWorkSession = true;
+        timerState.timeRemaining = workDurationInput.value * 60;
+        timerState.totalTime = timerState.timeRemaining;
+        updateTimerDisplay();
+        updateSessionStatus();
+    }
+
+    function completeSession() {
+        pauseTimer();
+
+        if (timerState.isWorkSession) {
+            timerState.isWorkSession = false;
+            timerState.timeRemaining = breakDurationInput.value * 60;
+            timerState.sessionsCompleted++;
+            sessionsCountDisplay.textContent = timerState.sessionsCompleted;
+            localStorage.setItem('student_toolkit_sessions', timerState.sessionsCompleted);
+        } else {
+            timerState.isWorkSession = true;
+            timerState.timeRemaining = workDurationInput.value * 60;
+        }
+
+        timerState.totalTime = timerState.timeRemaining;
+        updateTimerDisplay();
+        updateSessionStatus();
+
+        setTimeout(() => {
+            startTimer();
+        }, 1000);
+    }
+
+    function updateSessionStatus() {
+        const status = document.querySelector('.timer-status');
+        status.textContent = timerState.isWorkSession ? 'Work Time' : 'Break Time';
+    }
+
+    // ==================== EVENT LISTENERS - IDEA BOARD ====================
     addStudentButton.addEventListener('click', () => {
         const newName = newStudentInput.value.trim();
         if (newName && !students.includes(newName)) {
             students.push(newName);
-            saveData();
+            saveIdeaBoardData();
             populateDropdowns();
             newStudentInput.value = '';
         } else if (students.includes(newName)) {
@@ -184,8 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const idea = userIdeaInput.value.trim();
 
         if (name && idea) {
-            ideas.push({ name, idea });
-            saveData();
+            ideas.push({ name, idea, votes: 0 });
+            saveIdeaBoardData();
             renderIdeas(filterDropdown.value);
             userIdeaInput.value = '';
             userIdeaInput.focus();
@@ -208,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const updatedText = editIdeaText.value.trim();
         if (updatedText && currentEditIndex !== null) {
             ideas[currentEditIndex].idea = updatedText;
-            saveData();
+            saveIdeaBoardData();
             renderIdeas(filterDropdown.value);
             closeModal();
         }
@@ -217,13 +421,12 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmDeleteBtn.addEventListener('click', () => {
         if (currentDeleteIndex !== null) {
             ideas.splice(currentDeleteIndex, 1);
-            saveData();
+            saveIdeaBoardData();
             renderIdeas(filterDropdown.value);
             closeModal();
         }
     });
 
-    // Close modal on overlay click or cancel
     document.querySelectorAll('.close-modal, #cancelEdit, #cancelDelete').forEach(btn => {
         btn.addEventListener('click', closeModal);
     });
@@ -232,11 +435,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modalOverlay) closeModal();
     });
 
+    // ==================== EVENT LISTENERS - GPA CALCULATOR ====================
+    addCourseButton.addEventListener('click', addCourse);
+
+    courseCreditsInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addCourse();
+    });
+
+    resetGPAButton.addEventListener('click', () => {
+        courses = [];
+        localStorage.removeItem('student_toolkit_courses');
+        renderCoursesTable();
+    });
+
+    // ==================== EVENT LISTENERS - POMODORO TIMER ====================
+    startTimerButton.addEventListener('click', startTimer);
+    pauseTimerButton.addEventListener('click', pauseTimer);
+    resetTimerButton.addEventListener('click', resetTimer);
+    resetTimerMainButton.addEventListener('click', resetTimer);
+
+    workDurationInput.addEventListener('change', () => {
+        if (!timerState.isRunning) {
+            timerState.timeRemaining = workDurationInput.value * 60;
+            timerState.totalTime = timerState.timeRemaining;
+            updateTimerDisplay();
+        }
+    });
+
     themeToggle.addEventListener('click', toggleTheme);
 
-    // Initial Load
+    // ==================== INITIALIZATION ====================
     applyTheme();
     populateDropdowns();
     renderIdeas();
-    updateStats();
+    renderCoursesTable();
+    sessionsCountDisplay.textContent = timerState.sessionsCompleted;
+    updateTimerDisplay();
+    updateSessionStatus();
 });
