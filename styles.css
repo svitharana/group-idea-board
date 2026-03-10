@@ -182,28 +182,6 @@ footer {
     margin-bottom: 1rem;
 }
 
-/* menu tabs */
-.sidebar-menu {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.sidebar-menu button {
-    flex: 1;
-    padding: 0.5rem 0;
-    background: var(--secondary);
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: var(--transition);
-}
-
-.sidebar-menu button.active {
-    background: var(--primary);
-    color: white;
-}
 
 #sidebarSearch {
     width: 100%;
@@ -223,18 +201,20 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.75rem;
-    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-lg);
     transition: var(--transition);
-    cursor: pointer;
+    cursor: default;
     background: var(--bg-card);
-    border: 1px solid var(--input-border);
+    color: var(--text-main);
+    border: none;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
 
 #eventsList li:hover {
-    transform: scale(1.03);
-    box-shadow: 0 0 12px rgba(67,97,238,0.2);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
     background: var(--secondary-hover);
 }
 

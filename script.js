@@ -58,20 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressCircle = document.getElementById('progressCircle');
 
     // ==================== SIDEBAR ELEMENTS ====================
-    const sidebarMenuButtons = document.querySelectorAll('#sidebar .sidebar-menu button');
     const sidebarSearch = document.getElementById('sidebarSearch');
     const eventsList = document.getElementById('eventsList');
 
-    // data for sidebar
-    const sidebarData = {
-        events: [
-            { title: 'Annual Hackathon', date: 'Apr 5', venue: 'Main Hall', organizer: 'Tech Club', icon: 'H' },
-            { title: 'Guest Lecture: AI Ethics', date: 'Apr 12', venue: 'Auditorium', organizer: 'Dr. Smith', icon: '🎤' },
-            { title: 'Spring Break', date: 'May 1–7', venue: 'Campus Wide', organizer: 'Office of Student Affairs', icon: '🌴' }
-        ]
-    };
-
-    let currentMenu = 'events';
+    // sample events list
+    const upcomingEvents = [
+        { title: 'Annual Hackathon', date: 'Apr 5', venue: 'Main Hall', organizer: 'Tech Club', icon: 'H' },
+        { title: 'Guest Lecture: AI Ethics', date: 'Apr 12', venue: 'Auditorium', organizer: 'Dr. Smith', icon: '🎤' },
+        { title: 'Spring Break', date: 'May 1–7', venue: 'Campus Wide', organizer: 'Office of Student Affairs', icon: '🌴' },
+        { title: 'Coding Workshop', date: 'Jun 2', venue: 'Lab 204', organizer: 'CS Dept', icon: '💻' },
+        { title: 'Art Expo', date: 'Jul 20', venue: 'Gallery', organizer: 'Art Club', icon: '🎨' }
+    ];
 
     function svgDataForIcon(char) {
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="100%" height="100%" fill="#d1d5db"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">${char}</text></svg>`;
@@ -83,52 +80,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const query = sidebarSearch.value.trim().toLowerCase();
         eventsList.innerHTML = '';
 
-        if (currentMenu === 'events') {
-            const filtered = sidebarData.events.filter(e => e.title.toLowerCase().includes(query));
-            filtered.forEach(e => {
-                const li = document.createElement('li');
-                const imgSrc = svgDataForIcon(e.icon || '?');
-                li.innerHTML = `
-                    <div class="event-info">
-                        <img class="event-img" src="${imgSrc}" alt="${e.title}">
-                        <div class="event-text">
-                            <span class="event-title">${e.title}</span>
-                            <span class="event-date">${e.date}</span>
-                        </div>
+        const filtered = upcomingEvents.filter(e => e.title.toLowerCase().includes(query));
+        filtered.forEach(e => {
+            const li = document.createElement('li');
+            const imgSrc = svgDataForIcon(e.icon || '?');
+            li.innerHTML = `
+                <div class="event-info">
+                    <img class="event-img" src="${imgSrc}" alt="${e.title}">
+                    <div class="event-text">
+                        <span class="event-title">${e.title}</span>
+                        <span class="event-date">${e.date}</span>
                     </div>
-                    <div class="event-meta">
-                        <span class="event-venue">${e.venue}</span>
-                        <span class="event-organizer">${e.organizer}</span>
-                    </div>`;
-                eventsList.appendChild(li);
-            });
-        } else if (currentMenu === 'venues') {
-            const venues = [...new Set(sidebarData.events.map(e => e.venue))];
-            const filtered = venues.filter(v => v.toLowerCase().includes(query));
-            filtered.forEach(v => {
-                const li = document.createElement('li');
-                li.textContent = v;
-                eventsList.appendChild(li);
-            });
-        } else if (currentMenu === 'organizers') {
-            const orgs = [...new Set(sidebarData.events.map(e => e.organizer))];
-            const filtered = orgs.filter(o => o.toLowerCase().includes(query));
-            filtered.forEach(o => {
-                const li = document.createElement('li');
-                li.textContent = o;
-                eventsList.appendChild(li);
-            });
-        }
-    }
-
-    sidebarMenuButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            sidebarMenuButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentMenu = btn.getAttribute('data-type');
-            renderSidebar();
+                </div>
+                <div class="event-meta">
+                    <span class="event-venue">${e.venue}</span>
+                    <span class="event-organizer">${e.organizer}</span>
+                </div>`;
+            eventsList.appendChild(li);
         });
-    });
+    }
 
     sidebarSearch.addEventListener('input', renderSidebar);
 
@@ -143,24 +113,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==================== THEME MANAGEMENT ====================
-    // default to light unless explicitly set to dark
-    let isDarkMode = localStorage.getItem('student_toolkit_theme') === 'dark';
-
-    function applyTheme() {
-        if (isDarkMode) {
+    // read stored theme and apply to body class directly
+    (function initializeTheme() {
+        const stored = localStorage.getItem('student_toolkit_theme');
+        if (stored === 'dark') {
             document.body.classList.add('dark-mode');
-            sunIcon.style.display = 'none';
-            moonIcon.style.display = 'block';
         } else {
             document.body.classList.remove('dark-mode');
-            sunIcon.style.display = 'block';
-            moonIcon.style.display = 'none';
         }
-        localStorage.setItem('student_toolkit_theme', isDarkMode ? 'dark' : 'light');
+    })();
+
+    function applyTheme() {
+        const dark = document.body.classList.contains('dark-mode');
+        sunIcon.style.display = dark ? 'none' : 'block';
+        moonIcon.style.display = dark ? 'block' : 'none';
+        localStorage.setItem('student_toolkit_theme', dark ? 'dark' : 'light');
     }
 
     function toggleTheme() {
-        isDarkMode = !isDarkMode;
+        document.body.classList.toggle('dark-mode');
         applyTheme();
     }
 
