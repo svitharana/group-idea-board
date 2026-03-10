@@ -1,1 +1,2 @@
 We need to build a student toolkit website. The  idea board that has been already created need to be one of the functions. The functions of this website is 1. Ideaboard 2. GPA Calculator 3. Study Timer (Pomodoro Study Timer). 
+Add dark mode and add a button to switch between light mod
