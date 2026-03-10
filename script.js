@@ -57,6 +57,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const sessionsCountDisplay = document.getElementById('sessionsCount');
     const progressCircle = document.getElementById('progressCircle');
 
+    // ==================== SIDEBAR ELEMENTS ====================
+    const sidebarMenuButtons = document.querySelectorAll('#sidebar .sidebar-menu button');
+    const sidebarSearch = document.getElementById('sidebarSearch');
+    const eventsList = document.getElementById('eventsList');
+
+    // data for sidebar
+    const sidebarData = {
+        events: [
+            { title: 'Annual Hackathon', date: 'Apr 5', venue: 'Main Hall', organizer: 'Tech Club', icon: 'H' },
+            { title: 'Guest Lecture: AI Ethics', date: 'Apr 12', venue: 'Auditorium', organizer: 'Dr. Smith', icon: '🎤' },
+            { title: 'Spring Break', date: 'May 1–7', venue: 'Campus Wide', organizer: 'Office of Student Affairs', icon: '🌴' }
+        ]
+    };
+
+    let currentMenu = 'events';
+
+    function svgDataForIcon(char) {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="100%" height="100%" fill="#d1d5db"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="24">${char}</text></svg>`;
+        return 'data:image/svg+xml;base64,' + btoa(svg);
+    }
+
+    function renderSidebar() {
+        if (!eventsList) return;
+        const query = sidebarSearch.value.trim().toLowerCase();
+        eventsList.innerHTML = '';
+
+        if (currentMenu === 'events') {
+            const filtered = sidebarData.events.filter(e => e.title.toLowerCase().includes(query));
+            filtered.forEach(e => {
+                const li = document.createElement('li');
+                const imgSrc = svgDataForIcon(e.icon || '?');
+                li.innerHTML = `
+                    <div class="event-info">
+                        <img class="event-img" src="${imgSrc}" alt="${e.title}">
+                        <div class="event-text">
+                            <span class="event-title">${e.title}</span>
+                            <span class="event-date">${e.date}</span>
+                        </div>
+                    </div>
+                    <div class="event-meta">
+                        <span class="event-venue">${e.venue}</span>
+                        <span class="event-organizer">${e.organizer}</span>
+                    </div>`;
+                eventsList.appendChild(li);
+            });
+        } else if (currentMenu === 'venues') {
+            const venues = [...new Set(sidebarData.events.map(e => e.venue))];
+            const filtered = venues.filter(v => v.toLowerCase().includes(query));
+            filtered.forEach(v => {
+                const li = document.createElement('li');
+                li.textContent = v;
+                eventsList.appendChild(li);
+            });
+        } else if (currentMenu === 'organizers') {
+            const orgs = [...new Set(sidebarData.events.map(e => e.organizer))];
+            const filtered = orgs.filter(o => o.toLowerCase().includes(query));
+            filtered.forEach(o => {
+                const li = document.createElement('li');
+                li.textContent = o;
+                eventsList.appendChild(li);
+            });
+        }
+    }
+
+    sidebarMenuButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            sidebarMenuButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMenu = btn.getAttribute('data-type');
+            renderSidebar();
+        });
+    });
+
+    sidebarSearch.addEventListener('input', renderSidebar);
+
+
     let timerState = {
         isRunning: false,
         isWorkSession: true,
@@ -67,7 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==================== THEME MANAGEMENT ====================
-    let isDarkMode = localStorage.getItem('student_toolkit_theme') !== 'light';
+    // default to light unless explicitly set to dark
+    let isDarkMode = localStorage.getItem('student_toolkit_theme') === 'dark';
 
     function applyTheme() {
         if (isDarkMode) {
@@ -309,6 +386,26 @@ document.addEventListener('DOMContentLoaded', () => {
         progressCircle.style.strokeDashoffset = offset;
     }
 
+    // simple bell-like beep using Web Audio API or fallback audio element
+    function playBellSound() {
+        // try Web Audio API first
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 880;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.5);
+        } catch (e) {
+            const fallback = document.getElementById('bellSound');
+            if (fallback) fallback.play().catch(() => {});
+        }
+    }
+
     function startTimer() {
         if (timerState.isRunning) return;
 
@@ -344,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function completeSession() {
         pauseTimer();
+        playBellSound();
 
         if (timerState.isWorkSession) {
             timerState.isWorkSession = false;
@@ -469,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     populateDropdowns();
     renderIdeas();
     renderCoursesTable();
+    renderSidebar();
     sessionsCountDisplay.textContent = timerState.sessionsCompleted;
     updateTimerDisplay();
     updateSessionStatus();

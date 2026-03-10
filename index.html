@@ -40,6 +40,22 @@
         </div>
     </header>
 
+    <!-- Enhanced sidebar with cards, menu, and search -->
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <h3>Community Events</h3>
+        </div>
+        <div class="sidebar-menu">
+            <button data-type="events" class="active">Events</button>
+            <button data-type="venues">Venues</button>
+            <button data-type="organizers">Organizers</button>
+        </div>
+        <input type="text" id="sidebarSearch" placeholder="Search...">
+        <ul id="eventsList">
+            <!-- populated by script -->
+        </ul>
+    </aside>
+
     <main class="container">
         <!-- IDEA BOARD TOOL -->
         <div id="ideaboard-tool" class="tool-section active">
@@ -110,6 +126,7 @@
                                 <label for="courseGrade">Grade</label>
                                 <select id="courseGrade">
                                     <option value="">Select Grade</option>
+                                    <option value="4.0">A+ (4.0)</option>
                                     <option value="4.0">A (4.0)</option>
                                     <option value="3.7">A- (3.7)</option>
                                     <option value="3.3">B+ (3.3)</option>
@@ -254,6 +271,9 @@
             </div>
         </div>
     </div>
+
+    <!-- audio for bell sound -->
+    <audio id="bellSound" preload="auto"></audio>
 
     <script src="script.js"></script>
 </body>
