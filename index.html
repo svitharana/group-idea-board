@@ -77,7 +77,8 @@
 
                 <div class="input-group">
                     <label for="userIdea">Your Idea</label>
-                    <textarea id="userIdea" placeholder="What's on your mind? Describe your idea clearly..." rows="3" required></textarea>
+                    <textarea id="userIdea" placeholder="What's on your mind? Describe your idea clearly..." rows="3" maxlength="300" required></textarea>
+                    <div id="charCount" class="char-count">0/300</div>
                 </div>
                 
                 <button id="postButton" class="btn-primary">Post to Board</button>
@@ -241,7 +242,8 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <textarea id="editIdeaText" rows="4"></textarea>
+                <textarea id="editIdeaText" rows="4" maxlength="300"></textarea>
+                <div id="editCharCount" class="char-count">0/300</div>
             </div>
             <div class="modal-footer">
                 <button id="cancelEdit" class="btn-secondary">Cancel</button>

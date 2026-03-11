@@ -847,6 +847,17 @@ body.dark-mode .hot-card {
     align-items: center;
 }
 
+/* character count indicator for idea inputs */
+.char-count {
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 0.25rem;
+    text-align: right;
+}
+.char-count.over {
+    color: #c00;
+}
+
 .timer-progress {
     position: absolute;
     top: 0;

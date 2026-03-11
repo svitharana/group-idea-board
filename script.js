@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const postButton = document.getElementById('postButton');
     const resetFormButton = document.getElementById('resetFormButton');
     const ideasDisplay = document.getElementById('ideasDisplay');
+    const charCount = document.getElementById('charCount');
+    const editCharCount = document.getElementById('editCharCount');
+
+    const MAX_IDEA_LENGTH = 300;
     const themeToggle = document.getElementById('themeToggle');
     const sunIcon = themeToggle.querySelector('.sun-icon');
     const moonIcon = themeToggle.querySelector('.moon-icon');
@@ -259,6 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function openEditModal(index) {
         currentEditIndex = index;
         editIdeaText.value = ideas[index].idea;
+        if (editCharCount) {
+            const len = editIdeaText.value.length;
+            editCharCount.textContent = `${len}/${MAX_IDEA_LENGTH}`;
+        }
         openModal(editModal);
     }
 
@@ -452,11 +460,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // character counter for new idea field
+    userIdeaInput.addEventListener('input', () => {
+        const len = userIdeaInput.value.length;
+        if (charCount) {
+            charCount.textContent = `${len}/${MAX_IDEA_LENGTH}`;
+            if (len > MAX_IDEA_LENGTH) charCount.classList.add('over');
+            else charCount.classList.remove('over');
+        }
+    });
+
     postButton.addEventListener('click', () => {
         const name = nameDropdown.value;
         const idea = userIdeaInput.value.trim();
 
         if (name && idea) {
+            if (idea.length > MAX_IDEA_LENGTH) {
+                alert(`Ideas must be ${MAX_IDEA_LENGTH} characters or fewer.`);
+                return;
+            }
             // block duplicate idea text from being added by anyone
             const exists = ideas.some(i => i.idea.toLowerCase() === idea.toLowerCase());
             if (exists) {
@@ -484,9 +506,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderIdeas(e.target.value);
     });
 
+    // character counter for edit textarea
+    editIdeaText.addEventListener('input', () => {
+        const len = editIdeaText.value.length;
+        if (editCharCount) {
+            editCharCount.textContent = `${len}/${MAX_IDEA_LENGTH}`;
+            if (len > MAX_IDEA_LENGTH) editCharCount.classList.add('over');
+            else editCharCount.classList.remove('over');
+        }
+    });
+
     saveEditBtn.addEventListener('click', () => {
         const updatedText = editIdeaText.value.trim();
         if (updatedText && currentEditIndex !== null) {
+            if (updatedText.length > MAX_IDEA_LENGTH) {
+                alert(`Ideas must be ${MAX_IDEA_LENGTH} characters or fewer.`);
+                return;
+            }
             // prevent changing idea into an existing one
             const exists = ideas.some((i, idx) => idx !== currentEditIndex && i.idea.toLowerCase() === updatedText.toLowerCase());
             if (exists) {
