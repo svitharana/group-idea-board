@@ -174,6 +174,23 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('group_idea_board_ideas', JSON.stringify(ideas));
     }
 
+    // escape HTML entities to prevent injection when rendering
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // check for forbidden characters or tags
+    function containsHtmlTags(str) {
+        return /[<>]/.test(str);
+    }
+
     function populateDropdowns() {
         const placeholder = '<option value="" disabled selected>Select Your Name</option>';
         nameDropdown.innerHTML = placeholder;
@@ -226,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="${isHot ? '#ff9f1c' : 'currentColor'}" stroke="none"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                         </div>
                     </div>
-                    <p>${item.idea}</p>
+                    <p>${escapeHtml(item.idea)}</p>
                 </div>
                 <div class="idea-actions">
                     <button class="btn-vote vote-btn" title="Vote for this idea">
@@ -475,6 +492,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const idea = userIdeaInput.value.trim();
 
         if (name && idea) {
+            if (containsHtmlTags(idea)) {
+                alert('HTML tags or code are not allowed in ideas.');
+                return;
+            }
             if (idea.length > MAX_IDEA_LENGTH) {
                 alert(`Ideas must be ${MAX_IDEA_LENGTH} characters or fewer.`);
                 return;
@@ -519,6 +540,10 @@ document.addEventListener('DOMContentLoaded', () => {
     saveEditBtn.addEventListener('click', () => {
         const updatedText = editIdeaText.value.trim();
         if (updatedText && currentEditIndex !== null) {
+            if (containsHtmlTags(updatedText)) {
+                alert('HTML tags or code are not allowed in ideas.');
+                return;
+            }
             if (updatedText.length > MAX_IDEA_LENGTH) {
                 alert(`Ideas must be ${MAX_IDEA_LENGTH} characters or fewer.`);
                 return;
