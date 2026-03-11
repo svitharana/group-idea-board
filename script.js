@@ -457,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const idea = userIdeaInput.value.trim();
 
         if (name && idea) {
-            // prevent identical idea text from being added by anyone (case-insensitive)
+            // block duplicate idea text from being added by anyone
             const exists = ideas.some(i => i.idea.toLowerCase() === idea.toLowerCase());
             if (exists) {
                 alert('That idea already exists.');
@@ -487,10 +487,10 @@ document.addEventListener('DOMContentLoaded', () => {
     saveEditBtn.addEventListener('click', () => {
         const updatedText = editIdeaText.value.trim();
         if (updatedText && currentEditIndex !== null) {
-            // prevent editing to duplicate any existing idea text
+            // prevent changing idea into an existing one
             const exists = ideas.some((i, idx) => idx !== currentEditIndex && i.idea.toLowerCase() === updatedText.toLowerCase());
             if (exists) {
-                alert('An identical idea already exists.');
+                alert('That idea already exists.');
                 return;
             }
             ideas[currentEditIndex].idea = updatedText;
